@@ -1,0 +1,6 @@
+alpaca_dataset_with_embeddings/*
+data/*
+roleplay_dataset_with_embeddings/*
+teacher_dataset_with_embeddings/*
+wandb/*
+runs/*

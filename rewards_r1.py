@@ -10,7 +10,7 @@ class RewardFunctions:
     as before, but without nested functions.
     """
 
-    def format_reward(self, completions, target, thinking_levels, **kwargs):
+    def format_reward(self, completions, target, thinking_level, **kwargs):
         """
         Calculates a reward based on the formatting of the model completions.
 
@@ -32,7 +32,7 @@ class RewardFunctions:
             list[float]: Reward scores (1.0 or 0.0) for each completion.
         """
         rewards = []
-        for completion, gt, tk_level in zip(completions, target, thinking_levels):
+        for completion, gt, tk_level in zip(completions, target, thinking_level):
             try:
                 comp = "<think>" + completion  # Prepend synthetic tag
                 # Regex to check correct format with <think> and <answer> tags.
@@ -179,7 +179,7 @@ class RewardFunctions:
         except Exception:
             return 0.0
 
-    def equation_reward_2(self, completions, target, nums, sources, embeddings, **kwargs):
+    def equation_reward_2(self, completions, target, response, nums, source, embedding, **kwargs):
         """
         Evaluates completions either based on mathematical correctness or on instruction following.
 
@@ -198,9 +198,9 @@ class RewardFunctions:
             list[float]: Reward scores for each completion.
         """
         rewards = []
-        for completion, gt, numbers, src, embed in zip(completions, target, nums, sources, embeddings):
+        for completion, gt, res, numbers, src, embed in zip(completions, target, response, nums, source, embedding):
             if src == "dataset_0":
                 rewards.append(self.simple_eq_reward(completion, target, numbers))
             else:
-                rewards.append(self.simple_instruction_following_reward(completion, gt, embed))
+                rewards.append(self.simple_instruction_following_reward(completion, res, embed))
         return rewards 

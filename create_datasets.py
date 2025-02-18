@@ -71,8 +71,8 @@ def process_dataset(dataset, output_dir, batch_size=32):
 
 if __name__ == "__main__":
     # Define file paths for the teacher and roleplay datasets
-    teacher_dataset_path = 'GPTeacher/Instruct/gpt4-instruct-dedupe-only-dataset.json'
-    roleplay_dataset_path = '/home/ubuntu/GRPOruns/GPTeacher/Roleplay/roleplay-simple-deduped-roleplay-instruct.json'
+    teacher_dataset_path = '../GPTeacher/Instruct/gpt4-instruct-dedupe-only-dataset.json'
+    roleplay_dataset_path = '../GPTeacher/Roleplay/roleplay-simple-deduped-roleplay-instruct.json'
     
     # Load datasets
     print("Loading teacher dataset...")
