@@ -198,9 +198,9 @@ class RewardFunctions:
             list[float]: Reward scores for each completion.
         """
         rewards = []
-        for completion, gt, res, numbers, src, embed in zip(completions, target, response, nums, source, embedding):
+        for completion, gt, numbers, res,  src, embed in zip(completions, target, nums, response,  source, embedding):
             if src == "dataset_0":
-                rewards.append(self.simple_eq_reward(completion, target, numbers))
+                rewards.append(self.simple_eq_reward(completion, gt, numbers))
             else:
                 rewards.append(self.simple_instruction_following_reward(completion, res, embed))
         return rewards 
