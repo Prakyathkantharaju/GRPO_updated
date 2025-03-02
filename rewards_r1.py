@@ -107,6 +107,17 @@ class RewardFunctions:
                 rewards.append(0.0)
         return rewards
 
+    def coupled_reward(self, completions, target, nums, **kwargs):
+        rewards = []
+        gamma = self.gamma
+        beta = self.beta
+        for completion, gt, numbers in zip(completions, target, nums):
+            r_f = self.format_reward(completion, gt, numbers)
+            r_e = self.simple_eq_reward(completion, gt, numbers)
+            rewards.append(r_e + gamma * r_f + beta * (max(r_e, 0) * r_f))
+        return rewards
+
+
     def simple_eq_reward(self, completion, target, numbers, **kwargs):
         """
         Evaluates a single completion's correctness with a simple equation reward.
