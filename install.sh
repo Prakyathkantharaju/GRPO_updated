@@ -58,3 +58,6 @@ python -c "import vllm; print(f'VLLM: {vllm.__version__}')" || echo "VLLM not in
 python -c "import flash_attn; print(f'Flash Attention: {flash_attn.__version__}')" || echo "Flash Attention not installed correctly"
 
 echo "Installation complete! Activate the environment with: source .venv/bin/activate" 
+
+
+sudo apt install -y gh
