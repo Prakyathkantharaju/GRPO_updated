@@ -82,13 +82,8 @@ def grpo_function(
     # Load dataset from Hugging Face Hub
     dataset_0 = load_dataset(script_args.dataset_id_or_path, split=script_args.dataset_splits)
     dataset_0 = dataset_0.shuffle(seed=42)
-    dataset_0 = dataset_0.select(range(1000))
-    # dataset_1 = datasets.load_from_disk('alpaca_dataset_with_embeddings')
-    # dataset_1 = dataset_1.shuffle(seed=42).select(range(1000))
-    # dataset_2 = datasets.load_from_disk('teacher_dataset_with_embeddings')
-    # dataset_2 = dataset_2.shuffle(seed=42).select(range(1000))
-    # dataset_3 = datasets.load_from_disk('roleplay_dataset_with_embeddings')
-    # dataset_3 = dataset_3.shuffle(seed=42).select(range(1000))
+    # dataset_0 = dataset_0.select(range(1000))
+
 
     def add_thinking_level(dataset):
         dataset = dataset.map(lambda x: {"thinking_level": random.randint(1, 10)})
@@ -136,14 +131,7 @@ def grpo_function(
     train_dataset = train_dataset.shuffle(seed=42)
     test_dataset = test_dataset.shuffle(seed=42)
 
-    # convert our dataset to the r1 prompt
-    # dataset = dataset.map(lambda x: generate_r1_prompt(x["nums"], x["target"], x["thinking_level"],)
 
-    # split the dataset into train and test
-    # train_test_split = dataset.train_test_split(test_size=0.1)
-
-    # train_dataset = train_test_split["train"]
-    # test_dataset = train_test_split["test"]
 
     #########################
     # Instantiate GPRO trainer
