@@ -147,6 +147,13 @@ class RewardFunctions:
             if not re.match(allowed_pattern, equation):
                 return 0.0
             result = eval(equation, {"__builtins__": None}, {})
+            if abs(float(result) - float(target)) < 1e-5:
+                if random.random() < 0.10:  # 10% chance to log successful samples
+                    os.makedirs("completion_samples", exist_ok=True)
+                    log_file = os.path.join("completion_samples", "success_completion_samples.txt")
+                    with open(log_file, "a") as f:
+                        f.write(f"\n\n==============\n")
+                        f.write(comp)
             return 1.0 if abs(float(result) - float(target)) < 1e-5 else 0.0
         except Exception:
             return 0.0
