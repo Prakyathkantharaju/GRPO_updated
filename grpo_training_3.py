@@ -82,6 +82,7 @@ def grpo_function(
     # Load dataset from Hugging Face Hub
     dataset_0 = load_dataset(script_args.dataset_id_or_path, split=script_args.dataset_splits)
     dataset_0 = dataset_0.shuffle(seed=42)
+    dataset_0 = dataset_0.select(range(1000))
     # dataset_1 = datasets.load_from_disk('alpaca_dataset_with_embeddings')
     # dataset_1 = dataset_1.shuffle(seed=42).select(range(1000))
     # dataset_2 = datasets.load_from_disk('teacher_dataset_with_embeddings')
