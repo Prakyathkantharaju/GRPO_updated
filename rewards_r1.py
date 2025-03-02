@@ -35,7 +35,7 @@ class RewardFunctions:
             list[float]: Reward scores (1.0 or 0.0) for each completion.
         """
         rewards = []
-        for completion, gt, tk_level in zip([completions], [target], [thinking_level]):
+        for completion, gt, tk_level in zip(completions, target, thinking_level):
             try:
                 comp = "<think>" + completion  # Prepend synthetic tag
                 # Regex to check correct format with <think> and <answer> tags.
@@ -44,16 +44,17 @@ class RewardFunctions:
                 if match is None or len(match.groups()) != 2:
                     rewards.append(0.0)
                 else:
-                    think_text = match.group(1).strip()
-                    # Split text into sentences based on punctuation.
-                    sentences = [s for s in re.split(r'(?<=[.!?])\s+', think_text) if s.strip()]
-                    sentence_count = len(sentences)
-                    if tk_level == 1:
-                        # Expect 1 or 2 sentences for thinking level 1.
-                        rewards.append(1.0 if sentence_count in (1, 2) else 0.0)
-                    else:
-                        # For higher levels, require a minimum number of sentences.
-                        rewards.append(1.0 if sentence_count >= tk_level - 2 else 0.0)
+                    rewards.append(1.0)
+                    # think_text = match.group(1).strip()
+                    # # Split text into sentences based on punctuation.
+                    # sentences = [s for s in re.split(r'(?<=[.!?])\s+', think_text) if s.strip()]
+                    # sentence_count = len(sentences)
+                    # if tk_level == 1:
+                    #     # Expect 1 or 2 sentences for thinking level 1.
+                    #     rewards.append(1.0 if sentence_count in (1, 2) else 0.0)
+                    # else:
+                    #     # For higher levels, require a minimum number of sentences.
+                    #     rewards.append(1.0 if sentence_count >= tk_level - 2 else 0.0)
             except Exception:
                 rewards.append(0.0)
         return rewards[0]
@@ -115,9 +116,9 @@ class RewardFunctions:
         gamma = self.gamma
         beta = self.beta
         for completion, gt, numbers in zip(completions, target, nums):
-            r_f = self.format_reward(completion, gt, numbers)
+            r_f = self.format_reward([completion], [gt], [numbers])
             r_e = self.simple_eq_reward(completion, gt, numbers)
-            rewards.append(r_e + r_f + (max(r_e, 0) * r_f))
+            rewards.append(r_e + (max(r_e, 0) * r_f))
         return rewards
 
 
