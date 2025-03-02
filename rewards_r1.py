@@ -56,7 +56,7 @@ class RewardFunctions:
                         rewards.append(1.0 if sentence_count >= tk_level - 2 else 0.0)
             except Exception:
                 rewards.append(0.0)
-        return rewards
+        return rewards[0]
 
     def equation_reward(self, completions, target, nums, **kwargs):
         """
@@ -117,7 +117,7 @@ class RewardFunctions:
         for completion, gt, numbers in zip(completions, target, nums):
             r_f = self.format_reward(completion, gt, numbers)
             r_e = self.simple_eq_reward(completion, gt, numbers)
-            rewards.append(r_e + gamma * r_f + beta * (max(r_e, 0) * r_f))
+            rewards.append(r_e + gamma * 0.7 + 0.3 * (max(r_e, 0) * r_f))
         return rewards
 
 
