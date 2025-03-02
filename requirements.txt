@@ -1,0 +1,14 @@
+# Core ML dependencies
+torch>=2.0.0
+transformers>=4.31.0
+datasets>=2.14.0
+trl>=0.7.4
+requests>=2.31.0
+
+# Training infrastructure
+accelerate>=0.27.0
+deepspeed>=0.12.0
+peft>=0.7.0
+
+# Utilities
+pyyaml>=6.0.0 
