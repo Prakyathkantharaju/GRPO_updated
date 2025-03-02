@@ -35,7 +35,7 @@ class RewardFunctions:
             list[float]: Reward scores (1.0 or 0.0) for each completion.
         """
         rewards = []
-        for completion, gt, tk_level in zip(completions, target, thinking_level):
+        for completion, gt, tk_level in zip([completions], [target], [thinking_level]):
             try:
                 comp = "<think>" + completion  # Prepend synthetic tag
                 # Regex to check correct format with <think> and <answer> tags.
