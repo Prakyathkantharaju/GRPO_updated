@@ -117,7 +117,7 @@ class RewardFunctions:
         for completion, gt, numbers in zip(completions, target, nums):
             r_f = self.format_reward(completion, gt, numbers)
             r_e = self.simple_eq_reward(completion, gt, numbers)
-            rewards.append(r_e + r_f*self.gamma * (max(r_e, 0) * r_f))
+            rewards.append(r_e + r_f + (max(r_e, 0) * r_f))
         return rewards
 
 
