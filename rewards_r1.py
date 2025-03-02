@@ -9,6 +9,9 @@ class RewardFunctions:
     Each method replicates a reward function and follows the same API
     as before, but without nested functions.
     """
+    def __init__(self, gamma=0.5, beta=0.5):
+        self.gamma = gamma
+        self.beta = beta
 
     def format_reward(self, completions, target, thinking_level, **kwargs):
         """
