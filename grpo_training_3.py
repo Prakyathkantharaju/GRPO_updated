@@ -94,14 +94,6 @@ def grpo_function(
         return dataset
     
     dataset_0 = add_thinking_level(dataset_0)
-    # dataset_1 = add_thinking_level(dataset_1)
-    # dataset_2 = add_thinking_level(dataset_2)
-    # dataset_3 = add_thinking_level(dataset_3)
-    # merge the datasets but with an identity column to identify the source of the data
-    dataset_0 = dataset_0.map(lambda x: {"source": "dataset_0"})
-    # dataset_1 = dataset_1.map(lambda x: {"source": "dataset_1"})
-    # dataset_2 = dataset_2.map(lambda x: {"source": "dataset_2"})
-    # dataset_3 = dataset_3.map(lambda x: {"source": "dataset_3"})
 
 
     #####################
@@ -116,7 +108,7 @@ def grpo_function(
             },
             { 
                 "role": "user",
-                "content": f"Using the numbers {numbers}, create an equation that equals {target}, thinking level is {thinking_level}. You can use basic arithmetic operations (+, -, *, /) one or multiple times but each number can only be used once. Show your work in <think> </think> tags. And return the final equation in <answer> </answer> tags, for example <answer> (1 + 2) / 3 </answer>. Think step by step inside <think> tags. The magnitude of thinking is controlled by a thinking level from 1 - 10, where 1 is no thinking and 10 is large thinking time i.e if you are given level is 1 then you should only think for 1 or 2 sentences and if you given level is 10 then you can think for a lot more sentences and perform a longer reasoning for your answer."
+                "content": f"Using the numbers {numbers}, create an equation that equals {target}, Thinking level for this question is: {thinking_level}. You can use basic arithmetic operations (+, -, *, /) one or multiple times but each number can only be used once. Show your work in <think> </think> tags. And return the final equation in <answer> </answer> tags, for example <answer> (1 + 2) / 3 </answer>. Think step by step inside <think> tags. The magnitude of thinking is controlled by a thinking level from 1 - 10, where 1 is no thinking and 10 is large thinking time i.e if you are given level is 1 then you should only think for 1 or 2 sentences and if you given level is 10 then you can think for a lot more sentences and perform a longer reasoning for your answer."
             },
             {
                 "role": "assistant",

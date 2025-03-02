@@ -32,7 +32,7 @@ python create_datasets.py
 # Run the main script:
 
 ```bash
-accelerate launch --num_processes 7 --config_file deepspeed_zero1.yaml scripts/grpo_training_2.py --config grpo-qwen-2.5-r1.yaml
+accelerate launch --num_processes 7 --config_file deepspeed_zero1.yaml grpo_training_3.py --config grpo-qwen-2.5-r1.yaml
 ```
 
 
