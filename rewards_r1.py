@@ -2,6 +2,7 @@ import os
 import random
 import re
 import requests
+import torch
 
 class RewardFunctions:
     """
@@ -9,10 +10,10 @@ class RewardFunctions:
     Each method replicates a reward function and follows the same API
     as before, but without nested functions.
     """
-    def __init__(self, gamma=0.5, beta=0.5):
+    def __init__(self, gamma=0.5, beta=0.5, tokenizer=None):
         self.gamma = gamma
         self.beta = beta
-
+        self.tokenizer = tokenizer
     def format_reward(self, completions, target, thinking_level, **kwargs):
         """
         Calculates a reward based on the formatting of the model completions.
@@ -111,16 +112,91 @@ class RewardFunctions:
                 rewards.append(0.0)
         return rewards
 
-    def coupled_reward(self, completions, target, nums, **kwargs):
+    # def coupled_reward(self, completions, target, nums, **kwargs):
+    #     rewards = []
+    #     gamma = self.gamma
+    #     beta = self.beta
+    #     for completion, gt, numbers in zip(completions, target, nums):
+    #         r_f = self.format_reward([completion], [gt], [numbers])
+    #         r_e = self.simple_eq_reward(completion, gt, numbers)
+    #         rewards.append(r_e + (max(r_e, 0) * r_f))
+    #     return rewards
+
+
+    def _get_per_token_logps(self, model, input_ids, attention_mask, logits_to_keep):
+        # We add 1 to `logits_to_keep` because the last logits of the sequence is later excluded
+        logits = model(
+            input_ids=input_ids, attention_mask=attention_mask, logits_to_keep=logits_to_keep + 1
+        ).logits  # (B, L, V)
+        # print(logits.shape)
+        logits = logits[:, :-1, :]  # (B, L-1, V), exclude the last logit: it corresponds to the next token pred
+
+        # Compute the log probabilities for the input tokens. Use a loop to reduce memory peak.
+        per_token_logps = []
+        # print(logits_to_keep)
+        for logits_row, input_ids_row in zip(logits, input_ids[:, -logits_to_keep+1:]):
+            # print(logits_row.shape, input_ids_row.shape)
+            # print(logits_row.log_softmax(dim=-1).shape)
+            log_probs = logits_row.log_softmax(dim=-1)
+            token_log_prob = torch.gather(log_probs, dim=1, index=input_ids_row.unsqueeze(1)).squeeze(1)
+            per_token_logps.append(token_log_prob)
+        return torch.stack(per_token_logps)
+
+
+    def coupled_reward(self, model, completions, target, nums, **kwargs):
         rewards = []
         gamma = self.gamma
         beta = self.beta
         for completion, gt, numbers in zip(completions, target, nums):
             r_f = self.format_reward([completion], [gt], [numbers])
-            r_e = self.simple_eq_reward(completion, gt, numbers)
+            r_e = self.dpo_reward(model, completion, gt, numbers)
             rewards.append(r_e + (max(r_e, 0) * r_f))
         return rewards
 
+    def dpo_reward(self, model, completion, full_response, **kwargs):
+        chosen_encoding = self.tokenizer(full_response, return_tensors="pt")
+        chosen_input_ids = chosen_encoding.input_ids
+        chosen_attention_mask = chosen_encoding.attention_mask
+        chosen_logits_to_keep = chosen_input_ids.shape[1]
+        
+        # Process rejected completion
+        rejected_encoding = self.tokenizer(completion, return_tensors="pt")
+        rejected_input_ids = rejected_encoding.input_ids
+        rejected_attention_mask = rejected_encoding.attention_mask
+        rejected_logits_to_keep = rejected_input_ids.shape[1]
+        
+        with torch.inference_mode():
+            # Ensure all tensors are on the same device as the model
+            device = model.device
+            chosen_input_ids = chosen_input_ids.to(device)
+            chosen_attention_mask = chosen_attention_mask.to(device)
+            rejected_input_ids = rejected_input_ids.to(device)
+            rejected_attention_mask = rejected_attention_mask.to(device)
+            
+            # Get log probs for chosen completion
+            chosen_logprobs = self._get_per_token_logps(
+                model, 
+                chosen_input_ids, 
+                chosen_attention_mask, 
+                chosen_logits_to_keep
+            )
+            
+            # Get log probs for rejected completion
+            rejected_logprobs = self._get_per_token_logps(
+                model, 
+                rejected_input_ids, 
+                rejected_attention_mask, 
+                rejected_logits_to_keep
+            )
+        
+        # Calculate reward difference (log prob normalized by length)
+        chosen_reward = torch.sum(chosen_logprobs) / chosen_logprobs.shape[1]
+        rejected_reward = torch.sum(rejected_logprobs) / rejected_logprobs.shape[1]
+        
+        # DPO reward: log(sigmoid(β * (r_chosen - r_rejected)))
+        # Note: removed the negative sign from the loss formula
+        reward_diff = - (chosen_reward - rejected_reward)
+        return reward_diff
 
     def simple_eq_reward(self, completion, target, numbers, **kwargs):
         """
