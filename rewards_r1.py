@@ -144,6 +144,7 @@ class RewardFunctions:
             log_probs = logits_row.log_softmax(dim=-1)
             token_log_prob = torch.gather(log_probs, dim=1, index=input_ids_row.unsqueeze(1)).squeeze(1)
             per_token_logps.append(token_log_prob)
+            
         return torch.stack(per_token_logps)
 
 
@@ -158,13 +159,13 @@ class RewardFunctions:
         return rewards
 
     def dpo_reward(self, model, completion, full_response, **kwargs):
-        chosen_encoding = self.tokenizer(full_response, return_tensors="pt")
+        chosen_encoding = self.tokenizer([full_response], return_tensors="pt")
         chosen_input_ids = chosen_encoding.input_ids
         chosen_attention_mask = chosen_encoding.attention_mask
         chosen_logits_to_keep = chosen_input_ids.shape[1]
         
         # Process rejected completion
-        rejected_encoding = self.tokenizer(completion, return_tensors="pt")
+        rejected_encoding = self.tokenizer([completion], return_tensors="pt")
         rejected_input_ids = rejected_encoding.input_ids
         rejected_attention_mask = rejected_encoding.attention_mask
         rejected_logits_to_keep = rejected_input_ids.shape[1]
