@@ -100,7 +100,7 @@ def grpo_function(
     from datasets import Dataset
     dataset_0 = Dataset.from_list(processed_data)
     dataset_0 = dataset_0.shuffle(seed=42)
-    dataset_0 = dataset_0.select(range(100))
+    dataset_0 = dataset_0.select(range(70))
 
     #####################
     # Prepare and format dataset
