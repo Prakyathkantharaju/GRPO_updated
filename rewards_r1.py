@@ -153,7 +153,7 @@ class RewardFunctions:
                 attention_mask=attention_mask,
                 return_dict=True
             ).logits
-            print(f"Model output logits shape: {logits.shape}")
+            # print(f"Model output logits shape: {logits.shape}")
         except Exception as e:
             print(f"Error in model call: {e}")
             print(f"input_ids: {input_ids}")
