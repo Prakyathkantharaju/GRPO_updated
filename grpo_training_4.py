@@ -75,7 +75,7 @@ def grpo_function(
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-
+    rewards_functions.tokenizer = tokenizer
     ###############
     # Load datasets
     ###############
