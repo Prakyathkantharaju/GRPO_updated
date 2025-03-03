@@ -143,13 +143,13 @@ class RewardFunctions:
         return torch.stack(per_token_logps)
 
 
-    def coupled_reward(self, model, completions, target, nums, full_responses, **kwargs):
+    def coupled_reward(self, model, completions, full_response, **kwargs):
         rewards = []
         gamma = self.gamma
         beta = self.beta
-        for completion, gt, numbers, full_response in zip(completions, target, nums, full_responses):
-            r_f = self.format_reward([completion], [gt], [numbers])
-            r_e = self.dpo_reward(model, completion, full_response)
+        for completion, target in zip(completions, full_response):
+            r_f = self.format_reward([completion])
+            r_e = self.dpo_reward(model, completion, target)
             rewards.append(r_e + (max(r_e, 0) * r_f))
         return rewards
 
