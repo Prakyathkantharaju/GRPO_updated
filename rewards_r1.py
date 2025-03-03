@@ -125,6 +125,10 @@ class RewardFunctions:
 
     def _get_per_token_logps(self, model, input_ids, attention_mask, logits_to_keep):
         # We add 1 to `logits_to_keep` because the last logits of the sequence is later excluded
+        # Ensure input_ids are of type Long
+        if input_ids.dtype != torch.long:
+            input_ids = input_ids.long()
+        
         logits = model(
             input_ids=input_ids, attention_mask=attention_mask, logits_to_keep=logits_to_keep + 1
         ).logits  # (B, L, V)
@@ -147,7 +151,7 @@ class RewardFunctions:
         rewards = []
         gamma = self.gamma
         beta = self.beta
-        for completion, target, full_r in zip(completions, full_response, full_response):
+        for completion, target in zip(completions, full_response):
             r_f = self.format_reward([completion])
             r_e = self.dpo_reward(model, completion, target)
             rewards.append(r_e + (max(r_e, 0) * r_f))
@@ -169,9 +173,9 @@ class RewardFunctions:
             # Ensure all tensors are on the same device as the model
             device = model.device
             chosen_input_ids = chosen_input_ids.to(device)
-            chosen_attention_mask = chosen_attention_mask.to(device)
+            chosen_attention_mask = chosen_attention_mask.to(device).long()  # Ensure it's long type
             rejected_input_ids = rejected_input_ids.to(device)
-            rejected_attention_mask = rejected_attention_mask.to(device)
+            rejected_attention_mask = rejected_attention_mask.to(device).long()  # Ensure it's long type
             
             # Get log probs for chosen completion
             chosen_logprobs = self._get_per_token_logps(
