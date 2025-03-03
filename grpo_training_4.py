@@ -84,17 +84,21 @@ def grpo_function(
     
     # Create or load the dataset
     logger.info(f"Creating/loading dataset from {script_args.dataset_id_or_path}")
-    if os.path.exists(script_args.dataset_id_or_path):
-        # Load from existing JSON file
-        with open(script_args.dataset_id_or_path, 'r') as f:
-            import json
-            processed_data = json.load(f)
-        from datasets import Dataset
-        dataset_0 = Dataset.from_list(processed_data)
-    else:
-        # Create new dataset
-        dataset_0, _ = create_dataset(save_path=script_args.dataset_id_or_path)
-    
+    # if os.path.exists(script_args.dataset_id_or_path):
+    #     # Load from existing JSON file
+    #     with open(script_args.dataset_id_or_path, 'r') as f:
+    #         import json
+    #         processed_data = json.load(f)
+    #     from datasets import Dataset
+    #     dataset_0 = Dataset.from_list(processed_data)
+    # else:
+    #     # Create new dataset
+    #     dataset_0, _ = create_dataset(save_path=script_args.dataset_id_or_path)
+    with open("equation_dataset.json", "r") as f:
+        import json
+        processed_data = json.load(f)
+    from datasets import Dataset
+    dataset_0 = Dataset.from_list(processed_data)
     dataset_0 = dataset_0.shuffle(seed=42)
     dataset_0 = dataset_0.select(range(100))
 
