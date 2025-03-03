@@ -159,7 +159,10 @@ class RewardFunctions:
         return rewards
 
     def dpo_reward(self, model, completion, full_response, **kwargs):
-        print(completion, full_response)
+        print("--------------------------------")
+        print(f"completion: {completion}")
+        print(f"full_response: {full_response}")
+        print("--------------------------------")
         chosen_encoding = self.tokenizer([full_response], return_tensors="pt")
         chosen_input_ids = chosen_encoding.input_ids
         chosen_attention_mask = chosen_encoding.attention_mask
