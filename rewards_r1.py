@@ -126,13 +126,27 @@ class RewardFunctions:
     def _get_per_token_logps(self, model, input_ids, attention_mask, logits_to_keep):
         # We add 1 to `logits_to_keep` because the last logits of the sequence is later excluded
         # Ensure input_ids are of type Long
-        if input_ids.dtype != torch.long:
-            input_ids = input_ids.long()
+        print(f"_get_per_token_logps called with input_ids shape: {input_ids.shape}")
+        print(f"attention_mask shape: {attention_mask.shape}")
+        print(f"logits_to_keep: {logits_to_keep}")
         
-        logits = model(
-            input_ids=input_ids, attention_mask=attention_mask, logits_to_keep=logits_to_keep + 1
-        ).logits  # (B, L, V)
-        # print(logits.shape)
+        input_ids = input_ids.to(torch.long)
+        
+        # Debug the model call
+        try:
+            logits = model(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                return_dict=True
+            ).logits
+            print(f"Model output logits shape: {logits.shape}")
+        except Exception as e:
+            print(f"Error in model call: {e}")
+            print(f"input_ids: {input_ids}")
+            print(f"attention_mask: {attention_mask}")
+            raise
+        
+        # Continue with the rest of the function
         logits = logits[:, :-1, :]  # (B, L-1, V), exclude the last logit: it corresponds to the next token pred
 
         # Compute the log probabilities for the input tokens. Use a loop to reduce memory peak.
@@ -163,49 +177,62 @@ class RewardFunctions:
         print(f"completion: {completion}")
         print(f"full_response: {full_response}")
         print("--------------------------------")
+        
+        # Add detailed debugging for tokenization
         chosen_encoding = self.tokenizer([full_response], return_tensors="pt")
         chosen_input_ids = chosen_encoding.input_ids
         chosen_attention_mask = chosen_encoding.attention_mask
+        print(f"Chosen input_ids shape: {chosen_input_ids.shape}")
+        print(f"Chosen attention_mask shape: {chosen_attention_mask.shape}")
         chosen_logits_to_keep = chosen_input_ids.shape[1]
+        print(f"Chosen logits_to_keep: {chosen_logits_to_keep}")
         
-        # Process rejected completion
+        # Process rejected completion with debugging
         rejected_encoding = self.tokenizer([completion], return_tensors="pt")
         rejected_input_ids = rejected_encoding.input_ids
         rejected_attention_mask = rejected_encoding.attention_mask
+        print(f"Rejected input_ids shape: {rejected_input_ids.shape}")
+        print(f"Rejected attention_mask shape: {rejected_attention_mask.shape}")
         rejected_logits_to_keep = rejected_input_ids.shape[1]
+        print(f"Rejected logits_to_keep: {rejected_logits_to_keep}")
         
         with torch.inference_mode():
-            # Ensure all tensors are on the same device as the model
+            # Debug device information
             device = model.device
+            print(f"Model device: {device}")
+            
             chosen_input_ids = chosen_input_ids.to(device)
-            chosen_attention_mask = chosen_attention_mask.to(device).long()  # Ensure it's long type
+            chosen_attention_mask = chosen_attention_mask.to(device).long()
             rejected_input_ids = rejected_input_ids.to(device)
-            rejected_attention_mask = rejected_attention_mask.to(device).long()  # Ensure it's long type
+            rejected_attention_mask = rejected_attention_mask.to(device).long()
             
-            # Get log probs for chosen completion
+            # Debug before calling _get_per_token_logps
+            print("About to call _get_per_token_logps for chosen")
             chosen_logprobs = self._get_per_token_logps(
-                model, 
-                chosen_input_ids, 
-                chosen_attention_mask, 
-                chosen_logits_to_keep
+                model=model,
+                input_ids=chosen_input_ids,
+                attention_mask=chosen_attention_mask,
+                logits_to_keep=chosen_logits_to_keep
             )
+            print(f"Chosen logprobs shape: {chosen_logprobs.shape}")
             
-            # Get log probs for rejected completion
+            print("About to call _get_per_token_logps for rejected")
             rejected_logprobs = self._get_per_token_logps(
-                model, 
-                rejected_input_ids, 
-                rejected_attention_mask, 
-                rejected_logits_to_keep
+                model=model,
+                input_ids=rejected_input_ids,
+                attention_mask=rejected_attention_mask,
+                logits_to_keep=rejected_logits_to_keep
             )
-        
-        # Calculate reward difference (log prob normalized by length)
-        chosen_reward = torch.sum(chosen_logprobs) / chosen_logprobs.shape[1]
-        rejected_reward = torch.sum(rejected_logprobs) / rejected_logprobs.shape[1]
-        
-        # DPO reward: log(sigmoid(β * (r_chosen - r_rejected)))
-        # Note: removed the negative sign from the loss formula
-        reward_diff = - (chosen_reward - rejected_reward)
-        return reward_diff
+            print(f"Rejected logprobs shape: {rejected_logprobs.shape}")
+            
+            # Calculate reward difference (log prob normalized by length)
+            chosen_reward = torch.sum(chosen_logprobs) / chosen_logprobs.shape[1]
+            rejected_reward = torch.sum(rejected_logprobs) / rejected_logprobs.shape[1]
+            
+            # DPO reward: log(sigmoid(β * (r_chosen - r_rejected)))
+            # Note: removed the negative sign from the loss formula
+            reward_diff = - (chosen_reward - rejected_reward)
+            return reward_diff
 
     def simple_eq_reward(self, completion, target, numbers, **kwargs):
         """
