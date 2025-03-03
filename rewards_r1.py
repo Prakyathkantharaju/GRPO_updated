@@ -14,7 +14,7 @@ class RewardFunctions:
         self.gamma = gamma
         self.beta = beta
         self.tokenizer = tokenizer
-    def format_reward(self, completions, target, thinking_level, **kwargs):
+    def format_reward(self, completions, **kwargs):
         """
         Calculates a reward based on the formatting of the model completions.
 
@@ -36,7 +36,7 @@ class RewardFunctions:
             list[float]: Reward scores (1.0 or 0.0) for each completion.
         """
         rewards = []
-        for completion, gt, tk_level in zip(completions, target, thinking_level):
+        for completion in completions:
             try:
                 comp = "<think>" + completion  # Prepend synthetic tag
                 # Regex to check correct format with <think> and <answer> tags.
@@ -147,8 +147,8 @@ class RewardFunctions:
         rewards = []
         gamma = self.gamma
         beta = self.beta
-        for completion, target in zip(completions, full_response):
-            r_f = self.format_reward([completion, target, '' ])
+        for completion, target, full_r in zip(completions, full_response, full_response):
+            r_f = self.format_reward([completion])
             r_e = self.dpo_reward(model, completion, target)
             rewards.append(r_e + (max(r_e, 0) * r_f))
         return rewards
