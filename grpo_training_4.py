@@ -119,7 +119,12 @@ def grpo_function(
     # Apply tokenization to the dataset
     dataset_0 = dataset_0.map(tokenize_prompt)
     
-    # Rename the formatted_prompt field to prompt for the trainer
+    # Either use a different name for the formatted prompt
+    # Option 1: Use a different name instead of renaming to "prompt"
+    # dataset_0 = dataset_0.rename_column("formatted_prompt", "tokenized_prompt")
+    
+    # Option 2: Remove the original prompt column first, then rename
+    dataset_0 = dataset_0.remove_columns(["prompt"])
     dataset_0 = dataset_0.rename_column("formatted_prompt", "prompt")
     
     # Make sure thinking_level is available for the reward functions
