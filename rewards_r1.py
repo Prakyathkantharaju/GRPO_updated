@@ -148,7 +148,7 @@ class RewardFunctions:
         gamma = self.gamma
         beta = self.beta
         for completion, target in zip(completions, full_response):
-            r_f = self.format_reward([completion])
+            r_f = self.format_reward([completion, target, '' ])
             r_e = self.dpo_reward(model, completion, target)
             rewards.append(r_e + (max(r_e, 0) * r_f))
         return rewards
