@@ -96,6 +96,7 @@ def grpo_function(
         dataset_0, _ = create_dataset(save_path=script_args.dataset_id_or_path)
     
     dataset_0 = dataset_0.shuffle(seed=42)
+    dataset_0 = dataset_0.select(range(100))
 
     #####################
     # Prepare and format dataset
