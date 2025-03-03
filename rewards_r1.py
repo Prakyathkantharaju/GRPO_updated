@@ -188,7 +188,8 @@ class RewardFunctions:
         print(f"Chosen logits_to_keep: {chosen_logits_to_keep}")
         
         # Process rejected completion with debugging
-        rejected_encoding = self.tokenizer([completion], return_tensors="pt")
+        print(f"length of completion: {len(completion)}")
+        rejected_encoding = self.tokenizer([completion],return_tensors="pt")
         rejected_input_ids = rejected_encoding.input_ids
         rejected_attention_mask = rejected_encoding.attention_mask
         print(f"Rejected input_ids shape: {rejected_input_ids.shape}")
