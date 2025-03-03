@@ -129,11 +129,25 @@ class RewardFunctions:
         print(f"_get_per_token_logps called with input_ids shape: {input_ids.shape}")
         print(f"attention_mask shape: {attention_mask.shape}")
         print(f"logits_to_keep: {logits_to_keep}")
+        print(f"input_ids content: {input_ids}")
         
+        # Check if input_ids is being modified before the model call
+        input_ids_before = input_ids.clone()
         input_ids = input_ids.to(torch.long)
+        print(f"input_ids shape after conversion to long: {input_ids.shape}")
+        print(f"input_ids content after conversion: {input_ids}")
+        
+        # Check if there's any slicing or modification happening
+        if hasattr(self, 'some_attribute_that_might_modify_inputs'):
+            print(f"Checking if inputs are modified by attributes")
+        
+        # Check if logits_to_keep is causing issues
+        if logits_to_keep <= 0:
+            print(f"WARNING: logits_to_keep is {logits_to_keep}, which might cause issues")
         
         # Debug the model call
         try:
+            print(f"About to call model with input_ids shape: {input_ids.shape}")
             logits = model(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
